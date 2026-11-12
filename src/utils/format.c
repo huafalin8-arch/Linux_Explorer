@@ -1,6 +1,7 @@
 #include "monitor.h"
 #include <stdio.h>
 #include <wchar.h>
+#include <stdlib.h>
 
 void format_bytes(char *buf, size_t n, unsigned long long kb)
 {
