@@ -59,10 +59,10 @@ void net_info_sample(NetInfo *net, double now)
     char line[512];
     int lineno = 0;
     while (fgets(line, sizeof line, f)) {
-        if (++lineno <= 2) continue;              /* 跳过表头 */
+        if (++lineno <= 2) continue;              /* Skip header */
         char *colon = strchr(line, ':');
         if (!colon) continue;
-        if (strncmp(line, "  lo:", 5) == 0) continue;   /* 跳过 loopback */
+        if (strncmp(line, "  lo:", 5) == 0) continue;   /* skip loopback */
 
         unsigned long long v[16];
         int cnt = sscanf(colon + 1,
