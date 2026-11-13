@@ -59,6 +59,7 @@ void format_bytes(char *buf, size_t n, unsigned long long kb);
 void format_bytes_short(char *buf, size_t n, unsigned long long kb);
 void format_rate(char *buf, size_t n, double bytes_per_sec);
 void format_percent(char *buf, size_t n, double pct);
+void format_freq(char *buf, size_t n, unsigned long long khz);
 int  text_width(const char *s);
 
 /* utils/timer.c */
