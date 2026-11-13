@@ -1,5 +1,6 @@
 #include "monitor.h"
 #include <stdio.h>
+#include <string.h>
 #include <wchar.h>
 #include <stdlib.h>
 
@@ -42,6 +43,19 @@ void format_percent(char *buf, size_t n, double pct)
     snprintf(buf, n, "%.1f%%", pct);
 }
 
+void format_freq(char *buf, size_t n, unsigned long long khz)
+{
+    if (khz == 0) {
+        snprintf(buf, n, "   --   ");
+        return;
+    }
+    double ghz = (double)khz / 1e6;
+    if (ghz >= 1.0)
+        snprintf(buf, n, "%.2f GHz", ghz);
+    else
+        snprintf(buf, n, "%.0f MHz", (double)khz / 1e3);
+}
+
 int text_width(const char *s)
 {
     int w = 0;
@@ -63,3 +77,11 @@ int text_width(const char *s)
     }
     return w;
 }
+
+/* Needs attention */
+/* 
+Added #include <string.h>: The memset call in text_width requires
+* its declaration (in the previous version
+* it could still compile because monitor.h indirectly included it
+* but I’m not sure about that—please decide for yourselves)
+*/
