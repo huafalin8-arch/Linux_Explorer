@@ -42,7 +42,6 @@ static void read_proc_cpuinfo_mhz(CPUInfo *cpu)
             cur = proc;
         } else if (sscanf(line, "cpu MHz : %lf", &mhz) == 1) {
             if (cur < cpu->core_count) {
-
                 if (cpu->cores[cur].freq_khz == 0) {
                     cpu->cores[cur].freq_khz =
                         (unsigned long long)(mhz * 1000.0 + 0.5);
@@ -132,13 +131,9 @@ int cpu_info_sample(CPUInfo *cpu)
             unsigned long long idle  = id + io;
 
             update_usage(&cpu->total_usage, &cpu->total_usage_available,
-                         &(int){0}, total, idle,
+                         &cpu->stale_count,
+                         total, idle,
                          &cpu->prev_total, &cpu->prev_idle, &cpu->has_prev);
-
-            if (cpu->has_prev) {
-            /* So why am I adding this line? */
-            /* It might be for redundancy design */
-            }
         } else {
             unsigned int cid;
             if (sscanf(line, "cpu%u %llu %llu %llu %llu %llu %llu %llu %llu",
@@ -149,7 +144,8 @@ int cpu_info_sample(CPUInfo *cpu)
                 unsigned int nn = cid + 1;
                 CPUCore *p = realloc(cpu->cores, nn * sizeof(CPUCore));
                 if (!p) continue;
-                memset(p + cpu->core_count, 0, (nn - cpu->core_count) * sizeof(CPUCore));
+                memset(p + cpu->core_count, 0,
+                       (nn - cpu->core_count) * sizeof(CPUCore));
                 for (unsigned int k = cpu->core_count; k < nn; k++) {
                     p[k].core_id = k;
                     p[k].usage_available = true;
