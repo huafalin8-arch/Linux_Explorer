@@ -1,12 +1,93 @@
-# Linux_Explorer
-This is a Linux resource manager. That said, calling it a "manager" is a bit of a stretch—it's essentially just a resource monitor that tracks your system resource usage and real-time PC data
+这是一份更完整、正式一点的 README，已经加上了编译、安装和使用说明：
 
-## What is TermScope?
-TermScope is a in Linux Running's Resource monitoring software
-It can monitor your CPU, memory, and other resource usage
+```markdown
+# Linux_Explorer (TermScope)
 
-In theory, as long as your PC(This includes the vast majority of personal computers) has a C PC and can compile it properly, the program can run on your PC
+A lightweight terminal-based resource monitor for Linux.
 
-P.S 
-Let me tell you a joke: since I can’t touch the computer, I can’t properly compile AMD64 software.
-And, My English isn’t very good, so I relied heavily on machine translation for the project, I would be extremely grateful if a native English speaker could help me with the corrections
+TermScope displays real-time information about CPU usage (per-core), memory, swap, load average, network throughput, and running processes. It features a simple custom TUI with sorting, searching, and basic interactive controls.
+
+> Note: Calling it a “resource manager” is a bit of a stretch — it’s primarily a monitor.
+
+## Features
+
+- Per-core CPU usage and frequency
+- Memory and swap usage
+- System load average
+- Network RX/TX rates
+- Process list with sorting (by CPU or memory) and search
+- Lightweight custom terminal UI (no ncurses dependency)
+- Color support (can be disabled)
+- One-shot mode for scripting
+
+## Requirements
+
+- A C11-compatible compiler (`gcc` or `clang`)
+- Linux (relies on `/proc` filesystem)
+- Standard POSIX libraries
+
+## Building
+
+```bash
+make
+```
+
+This will produce the binary `tscope`.
+
+### Install (optional)
+
+```bash
+sudo make install
+```
+
+By default it installs to `/usr/bin/tscope`. You can change the prefix:
+
+```bash
+make install PREFIX=/usr/local
+```
+
+### Uninstall
+
+```bash
+sudo make uninstall
+```
+
+## Usage
+
+```bash
+./tscope [options]
+```
+
+### Options
+
+| Option          | Description                              |
+|-----------------|------------------------------------------|
+| `--interval SEC`| Sampling interval in seconds (default: 1.0) |
+| `--no-color`    | Disable colors                           |
+| `--once`        | Print one report and exit                |
+| `--version`     | Show version                             |
+| `--help`        | Show help                                |
+
+### Interactive Controls
+
+| Key       | Action                     |
+|-----------|----------------------------|
+| `q` / `Q` | Quit                       |
+| `p` / `P` | Pause / resume             |
+| `r` / `R` | Force refresh              |
+| `c` / `C` | Sort by CPU                |
+| `m` / `M` | Sort by memory             |
+| `/`       | Search processes           |
+| `↑` / `↓` | Select process             |
+| `?`       | Toggle help                |
+| `Ctrl+C`  | Quit                       |
+
+## License
+
+MIT License  
+Copyright (c) 2026 特蕾莎
+
+## Contributing
+
+Pull requests and suggestions are welcome.  
+If you notice any awkward English in the documentation, feel free to open an issue or PR — native speakers are especially appreciated.
