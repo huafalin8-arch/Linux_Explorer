@@ -10,7 +10,7 @@ typedef struct {
 
     double usage;                   /* 0.0 ~ 100.0 */
     bool   usage_available;         /* whether usage is valid */
-    int    stale_count;            /* consecutive dt == 0 count */
+    int    stale_count;             /* consecutive dt == 0 count */
 
     unsigned long long freq_khz;    /* current freq in kHz (0 = unknown) */
 
@@ -22,6 +22,7 @@ typedef struct {
 typedef struct {
     double total_usage;             /* Overall CPU usage */
     bool   total_usage_available;   /* whether total usage is valid */
+    int    stale_count;             /* consecutive dt == 0 count for total */
 
     unsigned int core_count;
     CPUCore *cores;                 /* Information per core, with a length of core_count */
@@ -66,7 +67,7 @@ typedef struct {
     unsigned long long rx_bytes, tx_bytes;
     double rx_rate, tx_rate;        /* byte/s */
     unsigned long long prev_rx, prev_tx;
-    double prev_time;               /* Last sampling time（Seconds） */
+    double prev_time;               /* Last sampling time (seconds) */
     bool has_prev;
 } NetInfo;
 
