@@ -6,6 +6,8 @@
 #include <locale.h>
 #include <signal.h>
 #include <getopt.h>
+#include <errno.h>
+#include <math.h>
 
 #define PROGRAM "tscope"
 #define VERSION "0.1.1"
@@ -68,10 +70,18 @@ int main(int argc, char **argv)
             usage(stdout);
             return 0;
         case OPT_INTERVAL: {
+            errno = 0;
             char *end;
             double v = strtod(optarg, &end);
-            if (*end != 0 || v <= 0 || v > 3600) {
-                fprintf(stderr, "%s: invalid interval '%s'\n", PROGRAM, optarg);
+
+            if (end == optarg ||
+                *end != '\0' ||
+                errno == ERANGE ||
+                !isfinite(v) ||
+                v <= 0.0 ||
+                v > 3600.0) {
+                fprintf(stderr, "%s: invalid interval '%s'\n",
+                        PROGRAM, optarg);
                 return 2;
             }
             cfg.interval = v;
