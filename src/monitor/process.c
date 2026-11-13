@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <unistd.h>
@@ -22,6 +23,24 @@ static void cache_clear(PrevCache *c)
 {
     memset(c->buckets, 0, sizeof c->buckets);
     c->pool_used = 0;
+}
+
+static int cache_reserve(PrevCache *c, size_t n)
+{
+    if (c->pool_cap >= n) return 0;
+
+    size_t nc = c->pool_cap ? c->pool_cap : 1024;
+    while (nc < n) {
+        if (nc > SIZE_MAX / 2) { nc = n; break; }
+        nc *= 2;
+    }
+
+    PrevNode *np = realloc(c->pool, nc * sizeof(PrevNode));
+    if (!np) return -1;
+
+    c->pool = np;
+    c->pool_cap = nc;
+    return 0;
 }
 
 static void cache_insert(PrevCache *c, pid_t pid, unsigned long long j)
@@ -53,7 +72,7 @@ void proc_list_free(ProcessList *pl)
 static int parse_stat(pid_t pid, ProcInfo *p, unsigned long long *cpu_j)
 {
     char path[64];
-    snprintf(path, sizeof path, "/proc/%d/stat", pid);
+    snprintf(path, sizeof path, "/proc/%d/stat", (int)pid);
     FILE *f = fopen(path, "r");
     if (!f) return -1;
 
@@ -88,7 +107,7 @@ static int parse_stat(pid_t pid, ProcInfo *p, unsigned long long *cpu_j)
 static void read_comm(pid_t pid, char *out, size_t n)
 {
     char path[64];
-    snprintf(path, sizeof path, "/proc/%d/comm", pid);
+    snprintf(path, sizeof path, "/proc/%d/comm", (int)pid);
     FILE *f = fopen(path, "r");
     if (!f) { snprintf(out, n, "?"); return; }
     if (!fgets(out, n, f)) out[0] = 0;
@@ -100,7 +119,7 @@ static void read_comm(pid_t pid, char *out, size_t n)
 static unsigned long long read_rss_kb(pid_t pid, long page_kb)
 {
     char path[64];
-    snprintf(path, sizeof path, "/proc/%d/statm", pid);
+    snprintf(path, sizeof path, "/proc/%d/statm", (int)pid);
     FILE *f = fopen(path, "r");
     if (!f) return 0;
     unsigned long sz, res;
@@ -121,7 +140,9 @@ int proc_list_sample(ProcessList *pl, unsigned long long total_mem_kb, double no
     double dt = pl->has_prev ? now - pl->prev_time : 0.0;
 
     size_t cnt = 0;
+    int oom = 0;
     struct dirent *de;
+
     while ((de = readdir(d))) {
         if (!isdigit((unsigned char)de->d_name[0])) continue;
         pid_t pid = (pid_t)atoi(de->d_name);
@@ -150,17 +171,28 @@ int proc_list_sample(ProcessList *pl, unsigned long long total_mem_kb, double no
         if (cnt == pl->cap) {
             size_t nc = pl->cap ? pl->cap * 2 : 256;
             ProcInfo *np = realloc(pl->items, nc * sizeof(ProcInfo));
-            if (!np) break;
+            if (!np) { oom = 1; break; }
             pl->items = np;
             pl->cap = nc;
         }
         pl->items[cnt++] = p;
     }
     closedir(d);
+
+    if (oom) {
+        pl->count = cnt;
+        return -1;
+    }
+
+    if (cache_reserve(&pl->cache, cnt) != 0) {
+        pl->count = cnt;
+        return -1;
+    }
+
     pl->count = cnt;
 
     cache_clear(&pl->cache);
-    for (size_t i = 0; i < pl->count; i++)
+    for (size_t i = 0; i < cnt; i++)
         cache_insert(&pl->cache, pl->items[i].pid, pl->items[i].cpu_jiffies);
 
     pl->prev_time = now;
