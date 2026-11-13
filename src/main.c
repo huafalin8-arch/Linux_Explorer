@@ -8,7 +8,7 @@
 #include <getopt.h>
 
 #define PROGRAM "tscope"
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 
 static Terminal g_term;
 static int g_term_active = 0;
