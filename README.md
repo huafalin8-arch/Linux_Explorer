@@ -5,4 +5,6 @@ This is a Linux resource manager. That said, calling it a "manager" is a bit of 
 TermScope is a in Linux Running's Resource monitoring software
 It can monitor your CPU, memory, and other resource usage
 
+In theory, as long as your PC(This includes the vast majority of personal computers) has a C PC and can compile it properly, the program can run on your PC
+
 P.S Let me tell you a joke: since I can’t touch the computer, I can’t properly compile AMD64 software.
