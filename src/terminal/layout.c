@@ -54,26 +54,63 @@ static void draw_frame(Screen *s, int W, int H, int split)
 static void draw_system(Screen *s, Monitor *m, int x, int y, int w, int h)
 {
     if (w < 10 || h < 3) return;
+
     char line[128];
     int cy = y;
     int bottom = y + h;
 
-    /* CPU Overview */
-    snprintf(line, sizeof line, "CPU %5.1f%%", m->cpu.total_usage);
+    /* ---------- CPU 总览 ---------- */
+    if (m->cpu.total_usage_available) {
+        snprintf(line, sizeof line, "CPU %5.1f%%  %u cores",
+                 m->cpu.total_usage, m->cpu.core_count);
+    } else {
+        snprintf(line, sizeof line, "CPU  N/A    %u cores",
+                 m->cpu.core_count);
+    }
     put_cell(s, x, cy, line, w, FG_WHITE);
     cy++;
-    if (cy < bottom) draw_bar(s, x, cy, w, m->cpu.total_usage, FG_GREEN);
+
+    if (cy < bottom && m->cpu.total_usage_available)
+        draw_bar(s, x, cy, w, m->cpu.total_usage, FG_GREEN);
     cy++;
 
-    /* Per core */
+    /* ---------- 每核心：频率 + 使用率 ---------- */
     for (unsigned int i = 0; i < m->cpu.core_count && cy < bottom; i++) {
-        snprintf(line, sizeof line, "C%-2u %5.1f%%", i, m->cpu.cores[i].usage);
-        put_cell(s, x, cy, line, 10, FG_GRAY);
-        draw_bar(s, x + 10, cy, w - 10, m->cpu.cores[i].usage, FG_CYAN);
+        const CPUCore *c = &m->cpu.cores[i];
+
+        /* 左：C<n> */
+        char tag[8];
+        snprintf(tag, sizeof tag, "C%-2u", i);
+        put_cell(s, x, cy, tag, 3, FG_GRAY);
+
+        int cx = x + 3;
+
+        /* 中：频率 */
+        if (m->cpu.freq_available) {
+            char fbuf[24];
+            format_freq(fbuf, sizeof fbuf, c->freq_khz);
+            put_cell(s, cx, cy, fbuf, 9, FG_CYAN);
+            cx += 9;
+        }
+
+        /* 右：使用率 */
+        char ubuf[24];
+        if (c->usage_available) {
+            snprintf(ubuf, sizeof ubuf, "%5.1f%%", c->usage);
+            put_cell(s, cx, cy, ubuf, 6, FG_WHITE);
+            cx += 6;
+            /* 剩余给进度条 */
+            int remaining = w - (cx - x);
+            if (remaining >= 4)
+                draw_bar(s, cx, cy, remaining, c->usage, FG_GREEN);
+        } else {
+            snprintf(ubuf, sizeof ubuf, "  N/A ");
+            put_cell(s, cx, cy, ubuf, 6, FG_YELLOW);
+        }
         cy++;
     }
 
-    /* memory */
+    /* ---------- 内存 ---------- */
     if (cy + 1 < bottom) {
         cy++;
         double pct = mem_usage_percent(&m->mem);
@@ -93,7 +130,7 @@ static void draw_system(Screen *s, Monitor *m, int x, int y, int w, int h)
         cy++;
     }
 
-    /* Load */
+    /* ---------- Load ---------- */
     if (cy + 1 < bottom) {
         cy++;
         snprintf(line, sizeof line, "LOAD %.2f %.2f %.2f",
@@ -102,7 +139,7 @@ static void draw_system(Screen *s, Monitor *m, int x, int y, int w, int h)
         cy++;
     }
 
-    /* Internet */
+    /* ---------- Net ---------- */
     if (cy < bottom) {
         char rx[24], tx[24];
         format_rate(rx, sizeof rx, m->net.rx_rate);
