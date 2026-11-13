@@ -21,7 +21,7 @@ typedef struct {
     bool show_help;
     bool searching;
     SortMode sort_mode;
-    int  selected;      /* Filter the indices in the sequence */
+    int selected; /* Selected index in the filtered process list */
     int  scroll;
     char search[64];
     size_t search_len;
