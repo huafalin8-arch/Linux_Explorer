@@ -1,6 +1,3 @@
-这是一份更完整、正式一点的 README，已经加上了编译、安装和使用说明：
-
-```markdown
 # Linux_Explorer (TermScope)
 
 A lightweight terminal-based resource monitor for Linux.
