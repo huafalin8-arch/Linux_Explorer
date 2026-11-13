@@ -7,7 +7,13 @@
 
 typedef struct {
     unsigned int core_id;           /* Logical core number */
-    double usage;                   /* 0.0 \~ 100.0 */
+
+    double usage;                   /* 0.0 ~ 100.0 */
+    bool   usage_available;         /* false → UI 显示 N/A; [NEW] whether usage is valid */
+    int    stale_count;             /* 连续 dt==0 次数; [NEW] consecutive dt == 0 count */
+
+    unsigned long long freq_khz;    /* 0 表示当前未知; [NEW] current freq in kHz (0 = unknown) */
+
     unsigned long long prev_idle;
     unsigned long long prev_total;
     bool has_prev;
@@ -15,8 +21,13 @@ typedef struct {
 
 typedef struct {
     double total_usage;             /* Overall CPU usage */
+    bool   total_usage_available;   /* [NEW] whether total usage is valid */
+
     unsigned int core_count;
     CPUCore *cores;                 /* Information per core, with a length of core_count */
+
+    bool   freq_available;          /* 任一核心可读频率; [NEW] true if any core's frequency is readable */
+
     unsigned long long prev_idle;   /* For overall sampling */
     unsigned long long prev_total;
     bool has_prev;
