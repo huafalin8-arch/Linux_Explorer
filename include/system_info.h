@@ -3,6 +3,28 @@
 
 #include <stdbool.h>
 
+/*
+* system_info.h
+* 
+* Provides sampling interfaces for four types of metrics: CPU, memory, load, and network.
+* Callers must invoke the *_info_sample() family of functions at a fixed interval.
+* Internally, the module calculates usage and rates using the "previous sampling snapshot + difference".
+* 
+* Data sources: /proc/stat, /proc/cpuinfo, /proc/meminfo,
+* 
+* 
+* Usage conventions:
+* cpu_info_init() and cpu_info_free() must be called in pairs;
+* On the first call to sample, only a baseline is established; usage/rate may be unavailable,
+* 
+* Network sampling requires the current time (in seconds) to be passed in externally.
+* 
+*/
+/*
+* Last edited: 2026.11.14 09:25 GMT +08:00
+* from: huafalin8-arch
+*/
+
 /* ---------- CPU ---------- */
 
 typedef struct {
