@@ -5,6 +5,38 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+/*
+* process_info.h - Linux process information collection module
+* 
+* Purpose:
+* Collect runtime information for each process in the system from the /proc
+* filesystem, and calculate CPU / memory usage percentages for process
+* monitoring (top/ps-like) use.
+* 
+* Main data structures:
+* ProcInfo     : Sampling result for a single process (pid, name, state,
+* 
+* PrevCache    : Cache based on hash buckets + object pool, storing the
+* 
+* 
+* 
+* ProcessList  : Process list container, holding sampling results, cache,
+* 
+* 
+* Interfaces:
+* proc_list_init()   Initialize the list and cache
+* proc_list_free()   Release all resources
+* proc_list_sample() Perform one sampling; total_mem_kb is used to calculate
+* 
+* 
+* proc_list_sort()   Sort the results (by memory or other fields)
+*/
+
+/*
+* Last edited: 2026.11.14 09:12 GMT +00:08
+* from: huafalin8-arch
+*/
+
 typedef struct {
     pid_t pid;
     char  name[64];
