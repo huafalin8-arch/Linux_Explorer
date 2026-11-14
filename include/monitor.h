@@ -7,6 +7,26 @@
 #include "process_info.h"
 #include "terminal.h"
 
+/*
+*
+* monitor.h - Core header file for the system monitoring program
+* 
+* Defines the monitor's main data structure (Monitor), configuration (Config),
+* UI state (UIState), and public interfaces for lifecycle, sampling, rendering,
+* filtering, and signal handling.
+* 
+* Module breakdown:
+* monitor.c        Main loop, sampling, initialization, and filtering logic
+* layout.c         UI layout rendering
+* utils/format.c   Numeric/text formatting utilities
+* utils/timer.c    Time utilities
+*/
+
+/*
+* Last edited: 2026.11.14 09:04 GMT +08:00
+* from: huafalin8-arch
+*/
+
 typedef struct {
     double interval;
     int    refresh_fps;
